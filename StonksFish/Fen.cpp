@@ -47,8 +47,8 @@ int* Fen::PositionFromFen(std::string fen)
 			rank--;
 		}
 		else {
-			if (isdigit(symbol)) {
-				file += (int)symbol;
+			if (isdigit((int)symbol)) {
+				file += symbol - '0';
 			}
 			else {
 				int piece = pieceFromSymbol[symbol];
