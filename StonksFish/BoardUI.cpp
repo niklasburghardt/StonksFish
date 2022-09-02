@@ -148,9 +148,9 @@ void BoardUI::OnMouseDown(wxMouseEvent& evt)
 		if (Piece::IsColor(m_board->squares[index], m_board->movingPlayer) && m_selectedSquare == -1)
 		{
 			m_draggingSquare = index;
+			wxWindow::Refresh();
 		}
 	}
-	wxWindow::Refresh();
 	evt.Skip();
 }
 void BoardUI::OnMouseUp(wxMouseEvent& evt)
@@ -164,7 +164,7 @@ void BoardUI::OnMouseUp(wxMouseEvent& evt)
 			
 		}
 		m_selectedSquare = -1;
-		
+		wxWindow::Refresh();
 	}
 	else if (m_draggingSquare != -1)
 	{
@@ -176,8 +176,8 @@ void BoardUI::OnMouseUp(wxMouseEvent& evt)
 			m_selectedSquare = index;
 		}
 			m_draggingSquare = -1;
+		wxWindow::Refresh();
 	}
-	wxWindow::Refresh();
 	evt.Skip();
 
 }

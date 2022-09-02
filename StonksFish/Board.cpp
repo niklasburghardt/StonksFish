@@ -10,9 +10,7 @@ Board::Board()
 	for (int i = 0; i < 64; i++) {
 		squares[i] = Piece::None;
 	}
-	squares[32] = Piece::Bishop | Piece::White;
-	squares[0] = Piece::King | Piece::Black;
-	squares[63] = Piece::Queen | Piece::White;
+	LoadStartPosition();
 }
 Board::~Board()
 {
