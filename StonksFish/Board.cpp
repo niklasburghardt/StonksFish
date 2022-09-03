@@ -88,17 +88,22 @@ void Board::LoadStartPosition()
 
 void Board::LoadPositionFromFen(std::string fen)
 {
-	int* loadedPosition = fenManager->PositionFromFen(fen);
+	Position loadedPosition = fenManager->PositionFromFen(fen);
 	//already doing it this way for optimization later on (piece lists)
 	for (int square = 0; square < 64; square++)
 	{
-		int piece = loadedPosition[square];
+		int piece = loadedPosition.squares[square];
 		squares[square] = piece;
 	}
-	whiteQueensideCastle = true;
-	whiteKingsideCastle = true;
-	blackQueensideCastle = true;
-	blackKingsideCastle = true;
+	movingPlayer = loadedPosition.whiteToMove ? Piece::White : Piece::Black;
+	whiteKingsideCastle = loadedPosition.whiteCastleKingside;
+	whiteQueensideCastle = loadedPosition.whiteCastleQueenside;
+	blackKingsideCastle = loadedPosition.blackCasteKingside;
+	blackQueensideCastle = loadedPosition.blackCastleQueenside;
+	if (loadedPosition.epFile>=0) {
+		int epPlayerOffset = loadedPosition.whiteToMove ? 32 : 24; //player not playing right now (!loadedPOsition.whiteTomove)
+		epIndex = epPlayerOffset + loadedPosition.epFile;
+	}
 	moveGenerator->GenerateLegalMoves(this);
 	
 }

@@ -1,18 +1,6 @@
 #include <string>
 #include <map>
 #include "Piece.h"
-class Fen {
-public:
-	
-	std::map<char, int> pieceFromSymbol;
-public:
-	Fen();
-public:
-	int* PositionFromFen(std::string fen);
-};
-
-
-
 class Position {
 public:
 	int* squares;
@@ -24,3 +12,16 @@ public:
 	bool whiteToMove;
 	int plyCount;
 };
+
+class Fen {
+public:
+	
+	std::map<char, int> pieceFromSymbol;
+public:
+	Fen();
+public:
+	Position PositionFromFen(std::string fen);
+};
+
+
+

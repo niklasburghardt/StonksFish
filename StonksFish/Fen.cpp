@@ -21,7 +21,7 @@ Fen::Fen() {
 	
 }
 
-int* Fen::PositionFromFen(std::string fen)
+Position Fen::PositionFromFen(std::string fen)
 {
 	Position positionInfo = Position();
 	positionInfo.squares = new int[64];
@@ -63,6 +63,9 @@ int* Fen::PositionFromFen(std::string fen)
 	positionInfo.whiteCastleQueenside = castleRights.find("Q") != std::string::npos;
 	positionInfo.blackCasteKingside = castleRights.find("k") != std::string::npos;
 	positionInfo.blackCastleQueenside = castleRights.find("q") != std::string::npos;
+	char ep = elements[3][0];
+	if (ep != '-')
+		positionInfo.epFile = (int)elements[3][1] - '0';
 	
-	return positionInfo.squares;
+	return positionInfo;
 }
