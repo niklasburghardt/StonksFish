@@ -1,6 +1,7 @@
 #pragma once
 #include "Fen.h"
 #include <string>
+#include "PseudoLegalMoves.h"
 class Board
 {
 public:
@@ -13,6 +14,10 @@ public:
 	int* squares;
 	int movingPlayer;
 	Fen* fenManager;
+public:
+	PseudoLegalMoves* moveGenerator;
+public:
+	int epIndex;
 public:
 	void MakeMove(int startIndex, int targetIndex);
 	void LoadStartPosition();

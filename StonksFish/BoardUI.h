@@ -14,6 +14,7 @@ public:
 private:
 	int m_draggingSquare;
 	int m_selectedSquare;
+	int* m_shownMoves;
 private:
 	wxButton* m_loadFenButton;
 	wxTextCtrl* m_fenInput;
@@ -22,9 +23,12 @@ private:
 	void ActivateRenderLoop(bool on);
 	void RenderBoard();
 	void DrawPieces();
+	void ShowLegalMoves(int index);
+	bool MovePossible(int startIndex, int targetIndex);
 	void DrawPieceLoop();
 	int IndexFromMousePosition(wxMouseEvent &evt);
 	std::map<int, wxString> symbolPath;
+	
 private:
 	void OnLoadFen(wxCommandEvent& evt);
 

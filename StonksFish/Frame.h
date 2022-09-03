@@ -9,10 +9,7 @@ public:
 	~Frame();
 public:
 	BoardUI* boardUI;
-public:
-	
 
-	
 private:
 	Board* m_board;
 	

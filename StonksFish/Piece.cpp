@@ -1,7 +1,14 @@
 #include "Piece.h"
 
 bool Piece::IsColor(int piece, int color) {
-	return (piece & colorMask) == color;
+	if (piece == 0)
+		return false;
+	if (color == Piece::White) {
+		return piece < 16 && piece > 8;
+	}
+	else {
+		return piece > 16 && piece <24;
+	}
 }
 int Piece::Color(int piece)
 {

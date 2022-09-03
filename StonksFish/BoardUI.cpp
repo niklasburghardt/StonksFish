@@ -3,6 +3,7 @@
 #include "BoardRepresentation.h"
 #include <math.h>
 #include <string>
+#include "Move.h"
 
 wxBEGIN_EVENT_TABLE(BoardUI, wxPanel)
 	EVT_BUTTON(10001, OnLoadFen)
@@ -10,9 +11,11 @@ wxBEGIN_EVENT_TABLE(BoardUI, wxPanel)
 wxEND_EVENT_TABLE();
 
 BoardUI::BoardUI(wxWindow* parent, Board* board) : wxPanel(parent, wxID_ANY, wxPoint(0, 0), wxDefaultSize, wxFULL_REPAINT_ON_RESIZE) {
+
 	m_board = board;
 	m_draggingSquare = -1;
 	m_selectedSquare = -1;
+	m_shownMoves = new int[64];
 	m_fenInput = new wxTextCtrl(this, wxID_ANY, "", wxPoint(900, 10), wxSize(100, 30));
 	m_loadFenButton = new wxButton(this, 10001, "Load Fen", wxPoint(900, 80), wxSize(50, 30));
 	Bind(wxEVT_PAINT, &BoardUI::OnPaint, this);
@@ -70,10 +73,16 @@ void BoardUI::RenderBoard()
 	int h = w;
 	wxColor dark = wxColor();
 	wxColor light = wxColor();
-	wxColor selectedField = wxColor();
+	wxColor selectedFieldLight = wxColor();
+	wxColor selectedFieldDark = wxColor();
+	wxColor possibleMoveLight = wxColor();
+	wxColor possibleMoveDark = wxColor();
 	dark.Set(170, 120, 74, 255);
 	light.Set(238, 210, 185, 255);
-	selectedField.Set(189, 210, 127, 255);
+	selectedFieldLight.Set(195, 214, 141, 255);
+	selectedFieldDark.Set(165, 191, 90, 255);
+	possibleMoveLight.Set(214, 141, 141, 255);
+	possibleMoveDark.Set(191, 90, 90, 255);
 
 	int optionOffset = 0;
 	/*if (size.x - size.y > 100)
@@ -85,16 +94,16 @@ void BoardUI::RenderBoard()
 			int y = h * rank;
 			wxBrush color = wxBrush();
 
-			if ((file + rank) % 2 == 0) {
-				color.SetColour(light);
-
-			}
-			else {
-				color.SetColour(dark);
-			}
+			bool white = (rank + file) % 2 == 0;
 			int currentIndex = BoardRepresentation::indexFromCoords(file, rank);
+
+			color.SetColour(white ? light : dark);
+
 			if (currentIndex == m_selectedSquare || currentIndex == m_draggingSquare) {
-				color.SetColour(selectedField);
+				color.SetColour(white ? selectedFieldLight : selectedFieldDark);
+			}
+			else if (m_shownMoves[BoardRepresentation::indexFromCoords(file, rank)] == 1) {
+				color.SetColour(white ? possibleMoveLight : possibleMoveDark);
 			}
 			dc.SetBrush(color);
 			wxRect rect(x, y, w, h);
@@ -130,10 +139,35 @@ void BoardUI::DrawPieces()
 			
 		}
 	}
-	
-	
-	
-	
+}
+
+bool BoardUI::MovePossible(int startIndex, int targetIndex) {
+	for (int i = 0; i < m_board->moveGenerator->moves.size(); i++) {
+		PieceMove move = m_board->moveGenerator->moves[i];
+		if (move.startSquare == startIndex && move.targetSquare == targetIndex) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void BoardUI::ShowLegalMoves(int index)
+{
+	//Clear bitboard
+	for (int i = 0; i < 64; i++) {
+		m_shownMoves[i] = 0;
+	}
+	if (index == -1) {
+		return;
+	}
+	for (int i = 0; i < m_board->moveGenerator->moves.size(); i++)
+	{
+		PieceMove move = m_board->moveGenerator->moves[i];
+		if (move.startSquare == index)
+		{
+			m_shownMoves[move.targetSquare] = 1;
+		}
+	}
 }
 
 void BoardUI::DrawPieceLoop()
@@ -148,6 +182,7 @@ void BoardUI::OnMouseDown(wxMouseEvent& evt)
 		if (Piece::IsColor(m_board->squares[index], m_board->movingPlayer) && m_selectedSquare == -1)
 		{
 			m_draggingSquare = index;
+			ShowLegalMoves(index);
 			wxWindow::Refresh();
 		}
 	}
@@ -158,24 +193,27 @@ void BoardUI::OnMouseUp(wxMouseEvent& evt)
 	int index = IndexFromMousePosition(evt);
 	if (m_selectedSquare != -1)
 	{
-		if (index != m_selectedSquare)
+		if (index != m_selectedSquare && MovePossible(m_selectedSquare, index))
 		{
 			m_board->MakeMove(m_selectedSquare, index);
 			
 		}
 		m_selectedSquare = -1;
+		ShowLegalMoves(-1);
 		wxWindow::Refresh();
+
 	}
 	else if (m_draggingSquare != -1)
 	{
-		if (index != m_draggingSquare) {
+		if (index != m_draggingSquare && MovePossible(m_draggingSquare, index)) {
 			//check if possible
 			m_board->MakeMove(m_draggingSquare, index);
+			ShowLegalMoves(-1);
 		}
 		else {
-			m_selectedSquare = index;
+			m_selectedSquare = m_draggingSquare;
 		}
-			m_draggingSquare = -1;
+		m_draggingSquare = -1;
 		wxWindow::Refresh();
 	}
 	evt.Skip();
