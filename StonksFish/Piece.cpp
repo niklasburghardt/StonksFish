@@ -10,6 +10,9 @@ bool Piece::IsColor(int piece, int color) {
 		return piece > 16 && piece <24;
 	}
 }
+bool Piece::isPiece(int piece) {
+	return piece > 8 && piece < 24;
+}
 int Piece::Color(int piece)
 {
 	return piece & colorMask;

@@ -39,8 +39,29 @@ void Board::MakeMove(PieceMove move)
 		int enemyPawnIndex = targetIndex + (movingPlayer == Piece::White ? -8 : 8);
 		squares[enemyPawnIndex] = Piece::None;
 	}
-	//Check if castle rights are lost
+	//Handle Castle
+	
 	int blackOffset = (movingPlayer == Piece::White ? 0 : 56);
+	if (flag == FLAG_CASTLE_KING) {
+		squares[WHITE_KC_INDEX + blackOffset] = Piece::None;
+		squares[WHITE_KC_INDEX + blackOffset - 2] = Piece::Rook | movingPlayer;
+	}
+	else if (flag == FLAG_CASTLE_QUEEN) {
+		squares[WHITE_QC_INDEX + blackOffset] = Piece::None;
+		squares[WHITE_QC_INDEX + blackOffset + 3] = Piece::Rook | movingPlayer;
+	}
+	//remove castle rights for player
+	if (flag == FLAG_CASTLE_KING || flag == FLAG_CASTLE_QUEEN) {
+		if (movingPlayer == Piece::White) {
+			whiteKingsideCastle = false;
+			whiteQueensideCastle = false;
+		}
+		else {
+			blackKingsideCastle = false;
+			blackQueensideCastle = false;
+		}
+	}
+	//Check if castle rights are lost
 	if (startIndex == WHITE_KC_INDEX + blackOffset || targetIndex == WHITE_KC_INDEX + blackOffset)
 		(movingPlayer == Piece::White) ? whiteKingsideCastle = false : blackKingsideCastle = true;
 	else if (startIndex == WHITE_QC_INDEX+blackOffset || targetIndex == WHITE_QC_INDEX+blackOffset)

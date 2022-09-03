@@ -75,7 +75,7 @@ void PseudoLegalMoves::GeneratePawnMoves(int index)
 			moves.push_back(PieceMove(index, index + right, FLAG_EP));
 		}
 	}
-
+	//Normal Moves and checking promotions
 	if (Piece::IsColor(m_board->squares[index + left], opponentColor)) {
 		MakePawnMove(index, index + left);
 	}
@@ -85,7 +85,8 @@ void PseudoLegalMoves::GeneratePawnMoves(int index)
 	if (Piece::IsColor(m_board->squares[index + front], friendlyColor) || Piece::IsColor(m_board->squares[index + front], opponentColor)) {
 		return;
 	}
-	moves.push_back(PieceMove(index, index + front));
+	MakePawnMove(index, index + front);
+	//double pawn pushes
 	bool startingPosition = false;
 	if (friendlyColor == Piece::White && BoardRepresentation::yFromIndex(index) == 6) //coordinates mirrowed
 		startingPosition = true;
@@ -123,6 +124,17 @@ void PseudoLegalMoves::GenerateKingMoves(int index)
 			}
 			moves.push_back(PieceMove(index, index + direction));
 		}
+	}
+	bool kingsideCastle = (friendlyColor == Piece::White ? m_board->whiteKingsideCastle : m_board->blackKingsideCastle);
+	bool queensideCastle = (friendlyColor == Piece::White ? m_board->whiteQueensideCastle : m_board->blackQueensideCastle);
+
+	if (kingsideCastle) {
+		if(!(Piece::isPiece(m_board->squares[index+1]) && Piece::isPiece(m_board->squares[index+2])))
+			moves.push_back(PieceMove(index, index + 2, FLAG_CASTLE_KING));
+	}
+	if (queensideCastle) {
+		if (!(Piece::isPiece(m_board->squares[index - 1]) && Piece::isPiece(m_board->squares[index - 2]) && Piece::isPiece(m_board->squares[index - 3])))
+			moves.push_back(PieceMove(index, index - 2, FLAG_CASTLE_QUEEN));
 	}
 }
 

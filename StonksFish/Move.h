@@ -15,7 +15,7 @@
 class PieceMove
 {
 public:
-	PieceMove(int start, int target, int flag=FLAG_NONE, int promotion=PROMOTION_NONE);
+	PieceMove(int start, int target, int flag=FLAG_NONE, int promotion=PROMOTION_QUEEN);
 public:
 	int startSquare;
 	int targetSquare;

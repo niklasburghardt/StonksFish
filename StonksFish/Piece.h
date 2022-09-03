@@ -20,6 +20,7 @@ public:
 	static const int colorMask = whiteMask | blackMask;
 
 public:
+	static bool isPiece(int piece);
 	static bool IsColor(int piece, int color);
 	static int Color(int piece);
 	static int PieceType(int piece);
