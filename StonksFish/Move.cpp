@@ -1,7 +1,9 @@
 #include "Move.h"
-PieceMove::PieceMove(int start, int target, bool ep)
+PieceMove::PieceMove(int start, int target, int flag, int promotion)
 {
 	startSquare = start;
 	targetSquare = target;
-	isEP = ep;
+	moveFlag = flag;
+	promotionType = promotion;
+	
 }

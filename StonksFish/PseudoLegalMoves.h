@@ -24,6 +24,7 @@ public:
 	void GeneratePawnMoves(int index);
 	void GenerateKnightMoves(int index);
 	void GenerateKingMoves(int index);
-
+private:
+	void MakePawnMove(int startIndex, int targetIndex);//Checking for promotion
 };
 

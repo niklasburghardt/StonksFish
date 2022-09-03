@@ -69,18 +69,18 @@ void PseudoLegalMoves::GeneratePawnMoves(int index)
 	int epIndex = m_board->epIndex;
 	if (epIndex != -1) {
 		if (index - epIndex == -1){
-			moves.push_back(PieceMove(index, index + left, true));
+			moves.push_back(PieceMove(index, index + left, FLAG_EP));
 		}
 		else if (index - epIndex == 1) {
-			moves.push_back(PieceMove(index, index + right, true));
+			moves.push_back(PieceMove(index, index + right, FLAG_EP));
 		}
 	}
 
 	if (Piece::IsColor(m_board->squares[index + left], opponentColor)) {
-		moves.push_back(PieceMove(index, index + left));
+		MakePawnMove(index, index + left);
 	}
 	if (Piece::IsColor(m_board->squares[index + right], opponentColor)) {
-		moves.push_back(PieceMove(index, index + right));
+		MakePawnMove(index, index + right);
 	}
 	if (Piece::IsColor(m_board->squares[index + front], friendlyColor) || Piece::IsColor(m_board->squares[index + front], opponentColor)) {
 		return;
@@ -96,7 +96,7 @@ void PseudoLegalMoves::GeneratePawnMoves(int index)
 			return;
 		}
 		else {
-			moves.push_back(PieceMove(index, index + front * 2));
+			moves.push_back(PieceMove(index, index + front * 2, FLAG_DOUBLE_PAWN_PUSH));
 		}
 	}
 }
@@ -124,4 +124,16 @@ void PseudoLegalMoves::GenerateKingMoves(int index)
 			moves.push_back(PieceMove(index, index + direction));
 		}
 	}
+}
+
+void PseudoLegalMoves::MakePawnMove(int startIndex, int targetIndex)
+{
+	//Check if its a promotion
+	//Check indepenent of moving player because pawns can never reach a square behind them
+	int y = BoardRepresentation::yFromIndex(targetIndex);
+	if (y == 7 || y == 0) {
+		moves.push_back(PieceMove(startIndex, targetIndex, FLAG_PROMOTION, PROMOTION_QUEEN));
+		return;
+	}
+	moves.push_back(PieceMove(startIndex, targetIndex));
 }

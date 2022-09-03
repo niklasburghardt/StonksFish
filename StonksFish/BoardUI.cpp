@@ -18,30 +18,35 @@ BoardUI::BoardUI(wxWindow* parent, Board* board) : wxPanel(parent, wxID_ANY, wxP
 	m_shownMoves = new int[64];
 	m_fenInput = new wxTextCtrl(this, wxID_ANY, "", wxPoint(900, 10), wxSize(100, 30));
 	m_loadFenButton = new wxButton(this, 10001, "Load Fen", wxPoint(900, 80), wxSize(50, 30));
+	handler = new wxPNGHandler();
+	wxImage::AddHandler(handler);
 	Bind(wxEVT_PAINT, &BoardUI::OnPaint, this);
 	Bind(wxEVT_LEFT_DOWN, &BoardUI::OnMouseDown, this);
 	Bind(wxEVT_LEFT_UP, &BoardUI::OnMouseUp, this);
 	Bind(wxEVT_BUTTON, &BoardUI::OnLoadFen, this);
+	
 	//white Pieces
-	symbolPath[Piece::Pawn | Piece::White] = "C:\\Users\\nikla\\Downloads\\chess-cpp-master\\chess-cpp-master\\img\\white_pawn.png";
-	symbolPath[Piece::Knight | Piece::White] = "C:\\Users\\nikla\\Downloads\\chess-cpp-master\\chess-cpp-master\\img\\white_knight.png";
-	symbolPath[Piece::Bishop | Piece::White] = "C:\\Users\\nikla\\Downloads\\chess-cpp-master\\chess-cpp-master\\img\\white_bishop.png";
-	symbolPath[Piece::Rook | Piece::White] = "C:\\Users\\nikla\\Downloads\\chess-cpp-master\\chess-cpp-master\\img\\white_rook.png";
-	symbolPath[Piece::Queen | Piece::White] = "C:\\Users\\nikla\\Downloads\\chess-cpp-master\\chess-cpp-master\\img\\white_queen.png";
-	symbolPath[Piece::King | Piece::White] = "C:\\Users\\nikla\\Downloads\\chess-cpp-master\\chess-cpp-master\\img\\white_king.png";
-	//black pieces
-	symbolPath[Piece::Pawn | Piece::Black] = "C:\\Users\\nikla\\Downloads\\chess-cpp-master\\chess-cpp-master\\img\\black_pawn.png";
-	symbolPath[Piece::Knight | Piece::Black] = "C:\\Users\\nikla\\Downloads\\chess-cpp-master\\chess-cpp-master\\img\\black_knight.png";
-	symbolPath[Piece::Bishop | Piece::Black] = "C:\\Users\\nikla\\Downloads\\chess-cpp-master\\chess-cpp-master\\img\\black_bishop.png";
-	symbolPath[Piece::Rook | Piece::Black] = "C:\\Users\\nikla\\Downloads\\chess-cpp-master\\chess-cpp-master\\img\\black_rook.png";
-	symbolPath[Piece::Queen | Piece::Black] = "C:\\Users\\nikla\\Downloads\\chess-cpp-master\\chess-cpp-master\\img\\black_queen.png";
-	symbolPath[Piece::King | Piece::Black] = "C:\\Users\\nikla\\Downloads\\chess-cpp-master\\chess-cpp-master\\img\\black_king.png";
+	symbolPath[Piece::Pawn | Piece::White]		= "C:\\DevPictures\\white_pawn.png";
+	symbolPath[Piece::Knight | Piece::White]	= "C:\\DevPictures\\white_knight.png";
+	symbolPath[Piece::Bishop | Piece::White]	= "C:\\DevPictures\\white_bishop.png";
+	symbolPath[Piece::Rook | Piece::White]		= "C:\\DevPictures\\white_rook.png";
+	symbolPath[Piece::Queen | Piece::White]		= "C:\\DevPictures\\white_queen.png";
+	symbolPath[Piece::King | Piece::White]		= "C:\\DevPictures\\white_king.png";
+	//black pieces								   C
+	symbolPath[Piece::Pawn | Piece::Black]		= "C:\\DevPictures\\black_pawn.png";
+	symbolPath[Piece::Knight | Piece::Black]	= "C:\\DevPictures\\black_knight.png";
+	symbolPath[Piece::Bishop | Piece::Black]	= "C:\\DevPictures\\black_bishop.png";
+	symbolPath[Piece::Rook | Piece::Black]		= "C:\\DevPictures\\black_rook.png";
+	symbolPath[Piece::Queen | Piece::Black]		= "C:\\DevPictures\\black_queen.png";
+	symbolPath[Piece::King | Piece::Black]		= "C:\\DevPictures\\black_king.png";
 
 	
 }
 
 void BoardUI::OnLoadFen(wxCommandEvent& evt)
 {
+	
+
 	std::string fen = (std::string)m_fenInput->GetValue();
 	m_board->LoadPositionFromFen(fen);
 	wxWindow::Refresh();
@@ -56,13 +61,15 @@ void BoardUI::OnIdle(wxIdleEvent& evt)
 
 void BoardUI::OnPaint(wxPaintEvent& evt)
 {
-	RenderBoard();
-	DrawPieces();
+	int offset = CalculateBoardOffset();
+	
+	RenderBoard(offset);
+	DrawPieces(offset);
 	evt.Skip();
 }
 
 
-void BoardUI::RenderBoard() 
+void BoardUI::RenderBoard(int offset) 
 {
 	wxPaintDC dc(this);
 	dc.SetPen(*wxTRANSPARENT_PEN);
@@ -90,7 +97,7 @@ void BoardUI::RenderBoard()
 	for (int rank = 7; rank >= 0; rank--)
 	{
 		for (int file = 0; file < 8; file++) {
-			int x = w * file + optionOffset;
+			int x = w * file + optionOffset + offset;
 			int y = h * rank;
 			wxBrush color = wxBrush();
 
@@ -113,11 +120,9 @@ void BoardUI::RenderBoard()
 		}
 	}
 }
-void BoardUI::DrawPieces()
+void BoardUI::DrawPieces(int offset)
 {
-	wxPNGHandler* handler = new wxPNGHandler();
-	wxImage::AddHandler(handler);
-	
+	wxPaintDC dc(this);
 	wxSize size = GetClientSize();
 	int w = std::min(size.x, size.y) / 8;
 	for(int i = 0; i<64; i++){
@@ -125,7 +130,7 @@ void BoardUI::DrawPieces()
 		if (piece > 0) {
 			
 			
-			int x = BoardRepresentation::xFromIndex(i) * w;
+			int x = BoardRepresentation::xFromIndex(i) * w + offset;
 			int y = BoardRepresentation::yFromIndex(i) * w;
 			if (i == m_draggingSquare) {
 				const wxPoint mouse = wxGetMousePosition();
@@ -134,12 +139,15 @@ void BoardUI::DrawPieces()
 
 			}
 			wxImage img = wxImage(symbolPath[piece], wxBITMAP_TYPE_ANY);
-			wxPaintDC dc(this);
-			dc.DrawBitmap(wxBitmap(img.Scale(w / 3 * 2, w / 3 * 2)), wxPoint(x + w / 6, y + w / 6), false);
+			
+			dc.DrawBitmap(wxBitmap(img.Scale(w, w)), wxPoint(x, y), false);
 			
 		}
 	}
+
 }
+
+
 
 bool BoardUI::MovePossible(int startIndex, int targetIndex) {
 	for (int i = 0; i < m_board->moveGenerator->moves.size(); i++) {
@@ -149,6 +157,17 @@ bool BoardUI::MovePossible(int startIndex, int targetIndex) {
 		}
 	}
 	return false;
+}
+
+PieceMove BoardUI::GiveMoveFromCoords(int startIndex, int targetIndex) {
+	for (int i = 0; i < m_board->moveGenerator->moves.size(); i++) {
+		PieceMove move = m_board->moveGenerator->moves[i];
+		if (move.startSquare == startIndex && move.targetSquare == targetIndex) {
+			return move;
+		}
+	}
+	//this can never happen its just a placeholder for the constructor
+	m_board->moveGenerator->moves[0];
 }
 
 void BoardUI::ShowLegalMoves(int index)
@@ -172,7 +191,8 @@ void BoardUI::ShowLegalMoves(int index)
 
 void BoardUI::DrawPieceLoop()
 {
-	DrawPieces();
+	int offset = CalculateBoardOffset();
+	DrawPieces(offset);
 }
 
 void BoardUI::OnMouseDown(wxMouseEvent& evt)
@@ -195,7 +215,7 @@ void BoardUI::OnMouseUp(wxMouseEvent& evt)
 	{
 		if (index != m_selectedSquare && MovePossible(m_selectedSquare, index))
 		{
-			m_board->MakeMove(m_selectedSquare, index);
+			m_board->MakeMove(GiveMoveFromCoords(m_selectedSquare, index));
 			
 		}
 		m_selectedSquare = -1;
@@ -207,7 +227,7 @@ void BoardUI::OnMouseUp(wxMouseEvent& evt)
 	{
 		if (index != m_draggingSquare && MovePossible(m_draggingSquare, index)) {
 			//check if possible
-			m_board->MakeMove(m_draggingSquare, index);
+			m_board->MakeMove(GiveMoveFromCoords(m_draggingSquare, index));
 			ShowLegalMoves(-1);
 		}
 		else {
@@ -220,9 +240,17 @@ void BoardUI::OnMouseUp(wxMouseEvent& evt)
 
 }
 
+int BoardUI::CalculateBoardOffset()
+{
+	wxSize screen = GetClientSize();
+	int w = std::min(screen.x, screen.y);
+	int offset = screen.x - w;
+	return offset;
+}
+
 int BoardUI::IndexFromMousePosition(wxMouseEvent& evt)
 {
-	double x = evt.GetX();
+	double x = evt.GetX() - CalculateBoardOffset();
 	double y = evt.GetY();
 	wxSize size = GetClientSize();
 	double w = std::min(size.x, size.y);

@@ -21,12 +21,33 @@ Board::~Board()
 	delete moveGenerator;
 }
 
-void Board::MakeMove(int startIndex, int targetIndex)
+void Board::MakeMove(PieceMove move)
 {
-	if (squares[startIndex] == (Piece::Pawn | movingPlayer) && targetIndex - startIndex == (movingPlayer == Piece::White ? 16 : -16)) {
+	int startIndex = move.startSquare;
+	int targetIndex = move.targetSquare;
+	int flag = move.moveFlag;
+	//Mark sqaure as EP after double Pawn Push
+	if (flag==FLAG_DOUBLE_PAWN_PUSH) {
 		epIndex = targetIndex;
 	}
-	squares[targetIndex] = squares[startIndex];
+	//Reset the EP file if the last move was not a double Pawn Push
+	else {
+		epIndex = -1;
+	}
+	//Check if its EP and capture enemy Pawn
+	if (flag == FLAG_EP) {
+		int enemyPawnIndex = targetIndex + (movingPlayer == Piece::White ? -8 : 8);
+		squares[enemyPawnIndex] = Piece::None;
+	}
+	//Check if castle rights are lost
+	int blackOffset = (movingPlayer == Piece::White ? 0 : 56);
+	if (startIndex == WHITE_KC_INDEX + blackOffset || targetIndex == WHITE_KC_INDEX + blackOffset)
+		(movingPlayer == Piece::White) ? whiteKingsideCastle = false : blackKingsideCastle = true;
+	else if (startIndex == WHITE_QC_INDEX+blackOffset || targetIndex == WHITE_QC_INDEX+blackOffset)
+		(movingPlayer == Piece::White) ? whiteQueensideCastle = false : blackQueensideCastle = true;
+	
+	//If promotion replace pawn with Promotion Piece
+	squares[targetIndex] = flag == FLAG_PROMOTION ? (move.promotionType | movingPlayer): squares[startIndex];
 	squares[startIndex] = Piece::None;
 	movingPlayer = movingPlayer == Piece::White ? Piece::Black : Piece::White;
 	moveGenerator->GenerateLegalMoves(this);
@@ -35,7 +56,7 @@ void Board::MakeMove(int startIndex, int targetIndex)
 		int min = 0;
 		int max = moveGenerator->moves.size() -1;
 		PieceMove randomMove = moveGenerator->moves[min + (std::rand() % (max - min + 1))];
-		MakeMove(randomMove.startSquare, randomMove.targetSquare);
+		MakeMove(randomMove);
 	}*/
 }
 
@@ -53,6 +74,10 @@ void Board::LoadPositionFromFen(std::string fen)
 		int piece = loadedPosition[square];
 		squares[square] = piece;
 	}
+	whiteQueensideCastle = true;
+	whiteKingsideCastle = true;
+	blackQueensideCastle = true;
+	blackKingsideCastle = true;
 	moveGenerator->GenerateLegalMoves(this);
 	
 }
