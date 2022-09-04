@@ -62,10 +62,14 @@ void Board::MakeMove(PieceMove move)
 		}
 	}
 	//Check if castle rights are lost
-	if (startIndex == WHITE_KC_INDEX + blackOffset || targetIndex == WHITE_KC_INDEX + blackOffset)
-		(movingPlayer == Piece::White) ? whiteKingsideCastle = false : blackKingsideCastle = true;
-	else if (startIndex == WHITE_QC_INDEX + blackOffset || targetIndex == WHITE_QC_INDEX + blackOffset)
-		(movingPlayer == Piece::White) ? whiteQueensideCastle = false : blackQueensideCastle = true;
+	if (startIndex == WHITE_KC_INDEX || targetIndex == WHITE_KC_INDEX)
+		whiteKingsideCastle = false;
+	else if (startIndex == WHITE_QC_INDEX || targetIndex == WHITE_QC_INDEX)
+		whiteQueensideCastle = false;
+	else if (startIndex == BLACK_KC_INDEX || targetIndex == BLACK_KC_INDEX)
+		blackKingsideCastle = false;
+	else if (startIndex == BLACK_QC_INDEX || targetIndex == BLACK_QC_INDEX)
+		blackQueensideCastle = false;
 
 	//If promotion replace pawn with Promotion Piece
 	squares[targetIndex] = flag == FLAG_PROMOTION ? (move.promotionType | movingPlayer) : squares[startIndex];

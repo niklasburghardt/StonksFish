@@ -129,11 +129,11 @@ void PseudoLegalMoves::GenerateKingMoves(int index)
 	bool queensideCastle = (friendlyColor == Piece::White ? m_board->whiteQueensideCastle : m_board->blackQueensideCastle);
 
 	if (kingsideCastle) {
-		if(!(Piece::isPiece(m_board->squares[index+1]) && Piece::isPiece(m_board->squares[index+2])))
+		if(!(Piece::isPiece(m_board->squares[index+1]) || Piece::isPiece(m_board->squares[index+2])))
 			moves.push_back(PieceMove(index, index + 2, FLAG_CASTLE_KING));
 	}
 	if (queensideCastle) {
-		if (!(Piece::isPiece(m_board->squares[index - 1]) && Piece::isPiece(m_board->squares[index - 2]) && Piece::isPiece(m_board->squares[index - 3])))
+		if (!(Piece::isPiece(m_board->squares[index - 1]) || Piece::isPiece(m_board->squares[index - 2]) || Piece::isPiece(m_board->squares[index - 3])))
 			moves.push_back(PieceMove(index, index - 2, FLAG_CASTLE_QUEEN));
 	}
 }
