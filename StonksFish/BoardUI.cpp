@@ -213,9 +213,11 @@ void BoardUI::OnMouseDown(wxMouseEvent& evt)
 {
 	int index = IndexFromMousePosition(evt);
 	if(index != -1){
-		if (Piece::IsColor(m_board->squares[index], m_board->movingPlayer) && m_selectedSquare == -1)
+		if (Piece::IsColor(m_board->squares[index], m_board->movingPlayer))
 		{
+			
 			m_draggingSquare = index;
+			m_selectedSquare = -1;
 			ShowLegalMoves(index);
 			wxWindow::Refresh();
 		}
