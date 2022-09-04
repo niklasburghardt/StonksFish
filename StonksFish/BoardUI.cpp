@@ -20,10 +20,12 @@ BoardUI::BoardUI(wxWindow* parent, Board* board) : wxPanel(parent, wxID_ANY, wxP
 	m_loadFenButton = new wxButton(this, 10001, "Load Fen", wxPoint(900, 80), wxSize(50, 30));
 	handler = new wxPNGHandler();
 	wxImage::AddHandler(handler);
+	
 	Bind(wxEVT_PAINT, &BoardUI::OnPaint, this);
 	Bind(wxEVT_LEFT_DOWN, &BoardUI::OnMouseDown, this);
 	Bind(wxEVT_LEFT_UP, &BoardUI::OnMouseUp, this);
-	Bind(wxEVT_BUTTON, &BoardUI::OnLoadFen, this);
+	
+	
 	
 	//white Pieces
 	symbolPath[Piece::Pawn | Piece::White]		= "C:\\DevPictures\\white_pawn.png";
@@ -39,6 +41,21 @@ BoardUI::BoardUI(wxWindow* parent, Board* board) : wxPanel(parent, wxID_ANY, wxP
 	symbolPath[Piece::Rook | Piece::Black]		= "C:\\DevPictures\\black_rook.png";
 	symbolPath[Piece::Queen | Piece::Black]		= "C:\\DevPictures\\black_queen.png";
 	symbolPath[Piece::King | Piece::Black]		= "C:\\DevPictures\\black_king.png";
+
+	//Add images
+	imagePath[Piece::Pawn | Piece::White] = wxImage(symbolPath[Piece::Pawn | Piece::White], wxBITMAP_TYPE_ANY);
+	imagePath[Piece::Knight | Piece::White] = wxImage(symbolPath[Piece::Knight | Piece::White], wxBITMAP_TYPE_ANY);
+	imagePath[Piece::Bishop | Piece::White] = wxImage(symbolPath[Piece::Bishop | Piece::White], wxBITMAP_TYPE_ANY);
+	imagePath[Piece::Rook | Piece::White] = wxImage(symbolPath[Piece::Rook | Piece::White], wxBITMAP_TYPE_ANY);
+	imagePath[Piece::Queen | Piece::White] = wxImage(symbolPath[Piece::Queen | Piece::White], wxBITMAP_TYPE_ANY);
+	imagePath[Piece::King | Piece::White] = wxImage(symbolPath[Piece::King | Piece::White], wxBITMAP_TYPE_ANY);
+	imagePath[Piece::Pawn | Piece::Black] = wxImage(symbolPath[Piece::Pawn | Piece::Black], wxBITMAP_TYPE_ANY);
+	imagePath[Piece::Knight | Piece::Black] = wxImage(symbolPath[Piece::Knight | Piece::Black], wxBITMAP_TYPE_ANY);
+	imagePath[Piece::Bishop | Piece::Black] = wxImage(symbolPath[Piece::Bishop | Piece::Black], wxBITMAP_TYPE_ANY);
+	imagePath[Piece::Rook | Piece::Black] = wxImage(symbolPath[Piece::Rook | Piece::Black], wxBITMAP_TYPE_ANY);
+	imagePath[Piece::Queen | Piece::Black] = wxImage(symbolPath[Piece::Queen | Piece::Black], wxBITMAP_TYPE_ANY);
+	imagePath[Piece::King | Piece::Black] = wxImage(symbolPath[Piece::King | Piece::Black], wxBITMAP_TYPE_ANY);
+
 
 	
 }
@@ -58,7 +75,6 @@ void BoardUI::OnIdle(wxIdleEvent& evt)
 	
 }
 
-
 void BoardUI::OnPaint(wxPaintEvent& evt)
 {
 	int offset = CalculateBoardOffset();
@@ -67,7 +83,6 @@ void BoardUI::OnPaint(wxPaintEvent& evt)
 	DrawPieces(offset);
 	evt.Skip();
 }
-
 
 void BoardUI::RenderBoard(int offset) 
 {
@@ -120,6 +135,7 @@ void BoardUI::RenderBoard(int offset)
 		}
 	}
 }
+
 void BoardUI::DrawPieces(int offset)
 {
 	wxPaintDC dc(this);
@@ -138,16 +154,14 @@ void BoardUI::DrawPieces(int offset)
 				int y = mouse.y;
 
 			}
-			wxImage img = wxImage(symbolPath[piece], wxBITMAP_TYPE_ANY);
 			
+			wxImage img = imagePath[piece];
 			dc.DrawBitmap(wxBitmap(img.Scale(w, w)), wxPoint(x, y), false);
 			
 		}
 	}
 
 }
-
-
 
 bool BoardUI::MovePossible(int startIndex, int targetIndex) {
 	for (int i = 0; i < m_board->moveGenerator->moves.size(); i++) {
@@ -208,18 +222,26 @@ void BoardUI::OnMouseDown(wxMouseEvent& evt)
 	}
 	evt.Skip();
 }
+
 void BoardUI::OnMouseUp(wxMouseEvent& evt)
 {
 	int index = IndexFromMousePosition(evt);
 	if (m_selectedSquare != -1)
 	{
-		if (index != m_selectedSquare && MovePossible(m_selectedSquare, index))
+		if (index != m_selectedSquare  )
 		{
-			m_board->MakeMove(GiveMoveFromCoords(m_selectedSquare, index));
+			ShowLegalMoves(-1);
+			if (MovePossible(m_selectedSquare, index)) {
+				m_board->MakeMove(GiveMoveFromCoords(m_selectedSquare, index));
+				m_selectedSquare = -1;
+			}
+			else if (Piece::IsColor(m_board->squares[index], m_board->movingPlayer)) {
+				m_selectedSquare = index;
+				ShowLegalMoves(index);
+			}
 			
 		}
-		m_selectedSquare = -1;
-		ShowLegalMoves(-1);
+		
 		wxWindow::Refresh();
 
 	}
@@ -239,6 +261,7 @@ void BoardUI::OnMouseUp(wxMouseEvent& evt)
 	evt.Skip();
 
 }
+
 
 int BoardUI::CalculateBoardOffset()
 {

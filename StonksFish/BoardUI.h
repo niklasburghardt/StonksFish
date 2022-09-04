@@ -12,10 +12,17 @@ public:
 	void OnMouseDown(wxMouseEvent& evt);
 	void OnMouseUp(wxMouseEvent& evt);
 	void OnIdle(wxIdleEvent& evt);
+	void OnResize(wxSizeEvent& evt);
 private:
 	int m_draggingSquare;
+	bool m_drawDragging;
 	int m_selectedSquare;
 	int* m_shownMoves;
+//store images so we don't have to download them each time
+private:
+
+	std::map<int, wxString> symbolPath;
+	std::map<int, wxImage> imagePath;
 private:
 	wxButton* m_loadFenButton;
 	wxTextCtrl* m_fenInput;
@@ -31,7 +38,6 @@ private:
 	PieceMove GiveMoveFromCoords(int startIndex, int targetIndex);
 	void DrawPieceLoop();
 	int IndexFromMousePosition(wxMouseEvent &evt);
-	std::map<int, wxString> symbolPath;
 	int CalculateBoardOffset();
 	
 private:

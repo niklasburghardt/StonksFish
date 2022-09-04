@@ -27,7 +27,7 @@ void Board::MakeMove(PieceMove move)
 	int targetIndex = move.targetSquare;
 	int flag = move.moveFlag;
 	//Mark sqaure as EP after double Pawn Push
-	if (flag==FLAG_DOUBLE_PAWN_PUSH) {
+	if (flag == FLAG_DOUBLE_PAWN_PUSH) {
 		epIndex = targetIndex;
 	}
 	//Reset the EP file if the last move was not a double Pawn Push
@@ -40,7 +40,7 @@ void Board::MakeMove(PieceMove move)
 		squares[enemyPawnIndex] = Piece::None;
 	}
 	//Handle Castle
-	
+
 	int blackOffset = (movingPlayer == Piece::White ? 0 : 56);
 	if (flag == FLAG_CASTLE_KING) {
 		squares[WHITE_KC_INDEX + blackOffset] = Piece::None;
@@ -64,11 +64,11 @@ void Board::MakeMove(PieceMove move)
 	//Check if castle rights are lost
 	if (startIndex == WHITE_KC_INDEX + blackOffset || targetIndex == WHITE_KC_INDEX + blackOffset)
 		(movingPlayer == Piece::White) ? whiteKingsideCastle = false : blackKingsideCastle = true;
-	else if (startIndex == WHITE_QC_INDEX+blackOffset || targetIndex == WHITE_QC_INDEX+blackOffset)
+	else if (startIndex == WHITE_QC_INDEX + blackOffset || targetIndex == WHITE_QC_INDEX + blackOffset)
 		(movingPlayer == Piece::White) ? whiteQueensideCastle = false : blackQueensideCastle = true;
-	
+
 	//If promotion replace pawn with Promotion Piece
-	squares[targetIndex] = flag == FLAG_PROMOTION ? (move.promotionType | movingPlayer): squares[startIndex];
+	squares[targetIndex] = flag == FLAG_PROMOTION ? (move.promotionType | movingPlayer) : squares[startIndex];
 	squares[startIndex] = Piece::None;
 	movingPlayer = movingPlayer == Piece::White ? Piece::Black : Piece::White;
 	moveGenerator->GenerateLegalMoves(this);
@@ -84,7 +84,7 @@ void Board::MakeMove(PieceMove move)
 void Board::LoadStartPosition()
 {
 	LoadPositionFromFen(startingFen);
-}
+}	
 
 void Board::LoadPositionFromFen(std::string fen)
 {
@@ -100,10 +100,10 @@ void Board::LoadPositionFromFen(std::string fen)
 	whiteQueensideCastle = loadedPosition.whiteCastleQueenside;
 	blackKingsideCastle = loadedPosition.blackCasteKingside;
 	blackQueensideCastle = loadedPosition.blackCastleQueenside;
-	if (loadedPosition.epFile>=0) {
+	if (loadedPosition.epFile >= 0) {
 		int epPlayerOffset = loadedPosition.whiteToMove ? 32 : 24; //player not playing right now (!loadedPOsition.whiteTomove)
 		epIndex = epPlayerOffset + loadedPosition.epFile;
 	}
 	moveGenerator->GenerateLegalMoves(this);
-	
+
 }
