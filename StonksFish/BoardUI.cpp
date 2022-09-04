@@ -10,20 +10,25 @@ wxBEGIN_EVENT_TABLE(BoardUI, wxPanel)
 
 wxEND_EVENT_TABLE();
 
-BoardUI::BoardUI(wxWindow* parent, Board* board) : wxPanel(parent, wxID_ANY, wxPoint(0, 0), wxDefaultSize, wxFULL_REPAINT_ON_RESIZE) {
+BoardUI::BoardUI(wxWindow* parent, Board* board) : wxPanel(parent, wxID_ANY, wxPoint(0, 0), wxDefaultSize, wxFULL_REPAINT_ON_RESIZE | wxFULLSCREEN_NOBORDER) {
 
 	m_board = board;
 	m_draggingSquare = -1;
 	m_selectedSquare = -1;
 	m_shownMoves = new int[64];
-	m_fenInput = new wxTextCtrl(this, wxID_ANY, "", wxPoint(900, 10), wxSize(100, 30));
-	m_loadFenButton = new wxButton(this, 10001, "Load Fen", wxPoint(900, 80), wxSize(50, 30));
+	m_markedSquares = new int[64];
+	LoadUI();
+	
 	handler = new wxPNGHandler();
 	wxImage::AddHandler(handler);
 	
 	Bind(wxEVT_PAINT, &BoardUI::OnPaint, this);
 	Bind(wxEVT_LEFT_DOWN, &BoardUI::OnMouseDown, this);
 	Bind(wxEVT_LEFT_UP, &BoardUI::OnMouseUp, this);
+	Bind(wxEVT_RIGHT_UP, &BoardUI::OnMarkSquare, this);
+	Bind(wxEVT_SIZE, &BoardUI::OnResize, this);
+	Bind(wxEVT_RIGHT_DCLICK, &BoardUI::OnClearMarkedSquares, this);
+	//Bind(wxEVT_MOTION, &BoardUI::OnDragMouse, this);
 	
 	
 	
@@ -81,7 +86,15 @@ void BoardUI::OnPaint(wxPaintEvent& evt)
 	
 	RenderBoard(offset);
 	DrawPieces(offset);
+	
 	evt.Skip();
+}
+
+void BoardUI::OnResize(wxSizeEvent& evt)
+{
+	//Resize UI
+	
+
 }
 
 void BoardUI::RenderBoard(int offset) 
@@ -99,12 +112,16 @@ void BoardUI::RenderBoard(int offset)
 	wxColor selectedFieldDark = wxColor();
 	wxColor possibleMoveLight = wxColor();
 	wxColor possibleMoveDark = wxColor();
+	wxColor markLight = wxColor();
+	wxColor markDark = wxColor();
 	dark.Set(170, 120, 74, 255);
 	light.Set(238, 210, 185, 255);
 	selectedFieldLight.Set(195, 214, 141, 255);
 	selectedFieldDark.Set(165, 191, 90, 255);
-	possibleMoveLight.Set(214, 141, 141, 255);
-	possibleMoveDark.Set(191, 90, 90, 255);
+	possibleMoveLight.Set(141, 170, 214, 255);
+	possibleMoveDark.Set(90, 143, 191, 255);
+	markLight.Set(214, 141, 141, 255);
+	markDark.Set(191, 90, 90, 255);
 
 	int optionOffset = 0;
 	/*if (size.x - size.y > 100)
@@ -127,6 +144,9 @@ void BoardUI::RenderBoard(int offset)
 			else if (m_shownMoves[BoardRepresentation::indexFromCoords(file, rank)] == 1) {
 				color.SetColour(white ? possibleMoveLight : possibleMoveDark);
 			}
+			if (m_markedSquares[currentIndex] == 1) {
+				color.SetColour(white ? markLight : markDark);
+			}
 			dc.SetBrush(color);
 			wxRect rect(x, y, w, h);
 
@@ -134,6 +154,12 @@ void BoardUI::RenderBoard(int offset)
 
 		}
 	}
+}
+
+void BoardUI::LoadUI() {
+	int offset = CalculateBoardOffset();
+	m_fenInput = new wxTextCtrl(this, wxID_ANY, "", wxPoint(10, 10), wxSize(200, 30));
+	m_loadFenButton = new wxButton(this, 10001, "Load Fen", wxPoint(10, 50), wxSize(60, 20));
 }
 
 void BoardUI::DrawPieces(int offset)
@@ -209,6 +235,13 @@ void BoardUI::DrawPieceLoop()
 	DrawPieces(offset);
 }
 
+void BoardUI::OnClearMarkedSquares(wxMouseEvent& evt)
+{
+	for (int i = 0; i < 64; i++) {
+		m_markedSquares[i] = 0;
+	}
+}
+
 void BoardUI::OnMouseDown(wxMouseEvent& evt)
 {
 	int index = IndexFromMousePosition(evt);
@@ -264,6 +297,19 @@ void BoardUI::OnMouseUp(wxMouseEvent& evt)
 
 }
 
+void BoardUI::OnDragMouse(wxMouseEvent& evt)
+{
+	if (m_draggingSquare != -1) {
+		wxWindow::Refresh();
+	}
+}
+
+void BoardUI::OnMarkSquare(wxMouseEvent& evt) {
+	int index = IndexFromMousePosition(evt);
+	int square = m_markedSquares[index];
+	(square == 1) ? (m_markedSquares[index] = 0) : (m_markedSquares[index] = 1);
+	wxWindow::Refresh();
+}
 
 int BoardUI::CalculateBoardOffset()
 {
