@@ -17,7 +17,7 @@ public:
 	static const int typeMask = 0b00111;
 	static const int blackMask = 0b10000;
 	static const int whiteMask = 0b1000;
-	static const int colorMask = whiteMask | blackMask;
+	static const int colorMask = blackMask |whiteMask ;
 
 public:
 	static bool isPiece(int piece);

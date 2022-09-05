@@ -6,6 +6,7 @@
 #define FLAG_CASTLE_QUEEN 3
 #define FLAG_PROMOTION 4
 #define FLAG_DOUBLE_PAWN_PUSH 5
+#define FLAG_KING_MOVE 6
 //Promotion Types
 #define PROMOTION_NONE 0
 #define PROMOTION_KNIGHT 3

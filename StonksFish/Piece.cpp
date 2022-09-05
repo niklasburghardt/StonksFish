@@ -19,6 +19,8 @@ int Piece::Color(int piece)
 }
 int Piece::PieceType(int piece)
 {
+	if (piece < 1)
+		return 0;
 	return piece & typeMask;
 }
 bool Piece::IsRookOrQueen(int piece)

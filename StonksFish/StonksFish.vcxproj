@@ -27,6 +27,7 @@
     <ClInclude Include="Main.h" />
     <ClInclude Include="Move.h" />
     <ClInclude Include="Piece.h" />
+    <ClInclude Include="PieceList.h" />
     <ClInclude Include="PrecompiledMoveData.h" />
     <ClInclude Include="PseudoLegalMoves.h" />
   </ItemGroup>
@@ -39,6 +40,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Move.cpp" />
     <ClCompile Include="Piece.cpp" />
+    <ClCompile Include="PieceList.cpp" />
     <ClCompile Include="PrecompiledMoveData.cpp" />
     <ClCompile Include="PseudoLegalMoves.cpp" />
   </ItemGroup>
